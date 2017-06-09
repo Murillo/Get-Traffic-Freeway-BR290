@@ -15,8 +15,8 @@ namespace GetTrafficFreewayBR290
 #if DEBUG
 			Traffic traffic = new Traffic(
 				@"/home/murillo/anaconda3/git/Get-Traffic-Freeway-BR290/data/arq.xlsx", 
-				new DateTime(2016,05,01), 
-				new DateTime(2016,05,05));
+				new DateTime(2016,01,01), 
+				new DateTime(2016,01,03));
 			traffic.Run(new Excel());
 #else
             string path = args[0];
