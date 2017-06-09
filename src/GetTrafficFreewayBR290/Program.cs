@@ -14,13 +14,16 @@ namespace GetTrafficFreewayBR290
         {
 #if DEBUG
 			Traffic traffic = new Traffic(
-				@"/home/murillo/Desktop/GetTrafficFreewayBR290/arq.xlsx", 
+				@"/home/murillo/anaconda3/git/Get-Traffic-Freeway-BR290/data/arq.xlsx", 
 				new DateTime(2016,05,01), 
-				new DateTime(2016,05,03));
+				new DateTime(2016,05,05));
 			traffic.Run(new Excel());
 #else
-            Traffic traffic = new Traffic();
-            traffic.Run();
+            string path = args[0];
+            DateTime start = Convert.ToDateTime(args[1]);
+            DateTime end = Convert.ToDateTime(args[2]);
+            Traffic traffic = new Traffic(path, start, end);
+            traffic.Run(new Excel());
 #endif
         }
     }

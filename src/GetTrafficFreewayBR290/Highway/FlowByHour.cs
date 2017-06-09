@@ -8,8 +8,8 @@ namespace GetTrafficFreewayBR290.Highway
 {
 	public class FlowByHour
     {
-        public int Hora { get; set; }
-        public int FluxoMedio { get; set; }
-        public int Fluxo { get; set; }
+        public int Hour { get; set; }
+        public int AverageFlow { get; set; }
+        public int Flow { get; set; }
     }
 }

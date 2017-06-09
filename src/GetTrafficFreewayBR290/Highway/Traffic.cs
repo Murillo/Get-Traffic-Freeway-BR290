@@ -1,4 +1,5 @@
-﻿using GetTrafficFreewayBR290.TypeFile;
+﻿using GetTrafficFreewayBR290.Text;
+using GetTrafficFreewayBR290.TypeFile;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
@@ -39,50 +40,66 @@ namespace GetTrafficFreewayBR290.Highway
         /// </summary>
 		public void Run(ITypeFile file)
         {
+            ExtractData();
+            CreateFile(file);
+        }
+
+        /// <summary>
+        /// This method extract the data of traffic
+        /// </summary>
+        private void ExtractData()
+        {
             string urlDayTotal = string.Empty;
             string urlDayHour = string.Empty;
-            for (DateTime data = _firstPeriod; data < _finalPeriod; data = data.AddDays(1.0))
+            for (DateTime date = _firstPeriod; date < _finalPeriod; date = date.AddDays(1.0))
             {
-                urlDayTotal = String.Format(
+                urlDayTotal = string.Format(
                     urlXmlDataTotal,
-                    String.Concat(data.Year, data.Month.ToString().PadLeft(2, '0'), data.Day.ToString().PadLeft(2, '0')),
+                    string.Concat(date.Year, date.Month.ToString().PadLeft(2, '0'), date.Day.ToString().PadLeft(2, '0')),
                     "12");
                 XDocument xmlDadosDiarioTotal = XDocument.Load(urlDayTotal);
-                Flow fluxoTotal = (from total in xmlDadosDiarioTotal.Descendants("FluxoData")
-                                    select new Flow
-                                    {
-                                        FluxoAcum12 = Convert.ToInt32(total.Descendants("Acumulado").FirstOrDefault().Attribute("FluxoAcum12").Value),
-                                        FluxoAcum18 = Convert.ToInt32(total.Descendants("Acumulado").FirstOrDefault().Attribute("FluxoAcum18").Value),
-                                        FluxoAcum24 = Convert.ToInt32(total.Descendants("Acumulado").FirstOrDefault().Attribute("FluxoAcum24").Value)
-                                    }).FirstOrDefault();
-                fluxoTotal.Data = data;
-	
+                Flow totalFlow = (from total in xmlDadosDiarioTotal.Descendants(ItensData.FlowData)
+                                  select new Flow
+                                  {
+                                      FlowAccum12 = Convert.ToInt32(total.Descendants(ItensData.Accumulated).FirstOrDefault().Attribute(ItensData.FlowAccum12).Value),
+                                      FlowAccum18 = Convert.ToInt32(total.Descendants(ItensData.Accumulated).FirstOrDefault().Attribute(ItensData.FlowAccum18).Value),
+                                      FlowAccum24 = Convert.ToInt32(total.Descendants(ItensData.Accumulated).FirstOrDefault().Attribute(ItensData.FlowAccum24).Value)
+                                  }).FirstOrDefault();
+                totalFlow.Date = date;
 
-                urlDayHour = String.Format(
+
+                urlDayHour = string.Format(
                     urlXmlHoraTotal,
-                    String.Concat(data.Year, data.Month.ToString().PadLeft(2, '0'), data.Day.ToString().PadLeft(2, '0')),
+                    string.Concat(date.Year, date.Month.ToString().PadLeft(2, '0'), date.Day.ToString().PadLeft(2, '0')),
                     "12");
-                XDocument xmlDadosDiarioHora = XDocument.Load(urlDayHour);
-
-                List<FlowByHour> listFluxoHorasDados = new List<FlowByHour>();
-                foreach (var item in xmlDadosDiarioHora.Descendants("FluxoData").ToList())
+                XDocument xmlDataDayHour = XDocument.Load(urlDayHour);
+                List<FlowByHour> listFlowHourDate = new List<FlowByHour>();
+                foreach (var item in xmlDataDayHour.Descendants(ItensData.FlowData).ToList())
                 {
-                    foreach (var itemFilho in item.Descendants("Time").ToList())
+                    foreach (var subItem in item.Descendants(ItensData.Time).ToList())
                     {
-                        FlowByHour fluxoHora = new FlowByHour();
-                        fluxoHora.Fluxo = Convert.ToInt32(itemFilho.Attribute("fluxo").Value);
-                        fluxoHora.FluxoMedio = Convert.ToInt32(itemFilho.Attribute("fluxomedio").Value);
-                        fluxoHora.Hora = Convert.ToInt32(itemFilho.Attribute("hora").Value);
-                        listFluxoHorasDados.Add(fluxoHora);
+                        FlowByHour flowHour = new FlowByHour();
+                        flowHour.Flow = Convert.ToInt32(subItem.Attribute(ItensData.Flow).Value);
+                        flowHour.AverageFlow = Convert.ToInt32(subItem.Attribute(ItensData.AverageFlow).Value);
+                        flowHour.Hour = Convert.ToInt32(subItem.Attribute(ItensData.Hour).Value);
+                        listFlowHourDate.Add(flowHour);
                     }
                 }
-                fluxoTotal.ListFluxoHora = listFluxoHorasDados;
-                _listFlow.Add(fluxoTotal);
-                data.AddDays(1);
+                totalFlow.ListFlowHour = listFlowHourDate;
+                _listFlow.Add(totalFlow);
+                date.AddDays(1);
             }
-			var dataset = file.GetFile(_listFlow);
-			BinaryWriter bw = new BinaryWriter(File.Open(_file, FileMode.OpenOrCreate));
-			bw.Write(dataset);
+        }
+
+        /// <summary>
+        /// This method create the file that has the informations
+        /// </summary>
+        /// <param name="file"></param>
+        private void CreateFile(ITypeFile file)
+        {
+            var dataset = file.GetFile(_listFlow);
+            BinaryWriter bw = new BinaryWriter(File.Open(_file, FileMode.OpenOrCreate));
+            bw.Write(dataset);
         }
     }
 }
