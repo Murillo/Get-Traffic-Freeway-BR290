@@ -21,7 +21,7 @@ Example:
 ```
 GetTrafficFreewayBR290 C:\data\traffic.xlsx 01/01/2016 01/05/2016
 ```
-You can using this application like class library in your application inside of .Net plataform.
+You can using this application like class library in your application in the .Net platform.
 ```
 Traffic traffic = new Traffic(
     @"C:\data\traffic.xlsx", 
