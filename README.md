@@ -10,3 +10,22 @@ The stretch between the beginning of the highway, next to BR-101 in the municipa
 <img src="images/br290_mapa_foto.jpg" style="width: 300px" />
 
 This project load the information of the average and total flow of vehicles per day in the Gravataí toll (Litoral/Capital), released by the operator Concepa. The information is stored in an Excel file.
+
+## Code
+To get the data, you must open the application with Visual Studio / Monodevelop or call it directly from the 'console application' of the Windows.
+
+```
+GetTrafficFreewayBR290 [path and name file] [start date] [end date]
+```
+Example:
+```
+GetTrafficFreewayBR290 C:\data\traffic.xlsx 01/01/2016 01/05/2016
+```
+You can using this application like class library in your application in the .Net platform.
+```
+Traffic traffic = new Traffic(
+    @"C:\data\traffic.xlsx", 
+    new DateTime(2016,01,01), 
+    new DateTime(2016,05,01));
+traffic.Run(new Excel());
+```
